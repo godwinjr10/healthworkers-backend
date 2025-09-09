@@ -15,7 +15,23 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors());
+const allowedOrigins = [
+  "http://localhost:3000", // local dev
+  "https://healthworkersregistry.onrender.com" 
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // allow Postman / curl without origin
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    console.warn("Blocked CORS request from:", origin);
+    return callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true, // allow cookies, sessions, etc.
+}));
+
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
